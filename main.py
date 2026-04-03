@@ -8,6 +8,7 @@ st.set_page_config(
 )
 
 pages = st.navigation([
+    st.Page("pages/0_Visao_Geral.py",          title="✨ Visão Geral"),
     st.Page("pages/1_Analise_Exploratoria.py",  title="📊 Análise Exploratória"),
     st.Page("pages/2_Modelos_Preditivos.py",    title="🤖 Modelos Preditivos"),
     st.Page("pages/3_Conclusoes.py",            title="💡 Conclusões"),
