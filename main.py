@@ -11,7 +11,7 @@ from util.data import load_all, load_turma, load_motivos, PEDRA_ORDER, PEDRA_COL
 from util.layout import sidebar
 
 st.set_page_config(
-    page_title="Passos Mágicos · Data Analytics",
+    page_title="🏠 Visão Geral",
     layout="wide",
     page_icon="✨",
     initial_sidebar_state="expanded"
@@ -55,7 +55,7 @@ topazio_20 = (df['PEDRA_2020']=='Topázio').sum()
 with c1: st.markdown(metric_card("1.349", "Alunos analisados", "3 anos de dados"), unsafe_allow_html=True)
 with c2: st.markdown(metric_card(f"{inde_22:.2f}", "INDE médio 2022", f"vs {inde_20:.2f} em 2020", COLORS['accent2']), unsafe_allow_html=True)
 with c3: st.markdown(metric_card(f"{pv_pct:.1f}%", "Atingiram Ponto de Virada", "em 2022", COLORS['gold']), unsafe_allow_html=True)
-with c4: st.markdown(metric_card(f"{bolsista_pv:.1f}%", "Bolsistas com PV", f"vs 9,4% não bolsistas", COLORS['accent']), unsafe_allow_html=True)
+with c4: st.markdown(metric_card(f"{bolsista_pv:.1f}%", "Bolsistas com Ponto de Virada", f"vs 9,4% não bolsistas", COLORS['accent']), unsafe_allow_html=True)
 with c5: st.markdown(metric_card(f"{topazio_22}", "Alunos Topázio 2022", f"+{topazio_22-topazio_20} desde 2020", COLORS['gold']), unsafe_allow_html=True)
 
 st.divider()
@@ -136,7 +136,8 @@ with col_b:
 
     layout2 = PLOTLY_LAYOUT.copy()
     layout2.update(height=240, barmode='stack', yaxis_title="%",
-                   legend=dict(orientation='h', y=-0.15, x=0.5, xanchor='center'))
+                   legend=dict(orientation='h', y=-0.15, x=0.5, xanchor='center'),
+                   xaxis=dict(**PLOTLY_LAYOUT['xaxis'], categoryorder='category ascending'))
     fig2.update_layout(**layout2)
     st.plotly_chart(fig2, use_container_width=True)
 

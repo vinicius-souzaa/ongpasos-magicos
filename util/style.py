@@ -45,10 +45,12 @@ PLOTLY_LAYOUT = dict(
     ),
     margin=dict(l=16, r=16, t=40, b=16),
     hoverlabel=dict(
-        bgcolor=COLORS["surface2"],
-        bordercolor=COLORS["border"],
-        font=dict(color=COLORS["text"], size=12),
+        bgcolor="#1A1D27",
+        bordercolor="#2E3350",
+        font=dict(color="#F1F5F9", size=12),
+        namelength=-1,
     ),
+    title=dict(text=""),
 )
 
 CSS = """
