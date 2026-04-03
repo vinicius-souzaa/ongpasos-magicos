@@ -11,7 +11,6 @@ from util.style import inject_css, metric_card, insight, section_header, PLOTLY_
 from util.data import load_all, load_turma, PEDRA_ORDER, PEDRA_COLORS, IND_LABELS, IND_PESOS
 from util.layout import sidebar
 
-st.set_page_config(page_title="📊 Análise Exploratória", layout="wide", page_icon="📊", initial_sidebar_state="expanded")
 inject_css()
 sidebar()
 
