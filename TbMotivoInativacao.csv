@@ -1,0 +1,20 @@
+IdMotivoInativacao,MotivoInativacao
+1,Abandono
+2,Transferência
+3,Conclusão
+4,Conflito de Horário
+5,Sem Retorno ao Contato
+6,Mudança de Endereço/Cidade
+7,Problemas de Saúde
+8,Reclassificação/Fase
+9,Falta de Transporte
+10,Desistência sem Justificativa
+11,Mudança de Escola
+12,Viagem/Mudança
+13,Problema Financeiro
+14,Motivo Pessoal
+15,Baixo Engajamento
+16,Ingresso no Mercado de Trabalho
+17,Outro Motivo
+19,Graduação/Conclusão de Fase
+22,Transferência Interna
