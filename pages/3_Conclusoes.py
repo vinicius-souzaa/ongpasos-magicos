@@ -8,7 +8,7 @@ from util.style import inject_css, insight, section_header, PLOTLY_LAYOUT, COLOR
 from util.data import load_all
 from util.layout import sidebar
 
-st.set_page_config(page_title="Conclusões · Passos Mágicos", layout="wide", page_icon="☁️", initial_sidebar_state="expanded")
+st.set_page_config(page_title="💡 Conclusões", layout="wide", page_icon="☁️", initial_sidebar_state="expanded")
 inject_css()
 sidebar()
 

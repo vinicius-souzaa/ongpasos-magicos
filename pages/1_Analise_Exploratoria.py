@@ -7,11 +7,11 @@ import numpy as np
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from util.style import inject_css, metric_card, insight, section_header, PLOTLY_LAYOUT, COLORS
+from util.style import inject_css, metric_card, insight, section_header, PLOTLY_LAYOUT, COLORS, get_layout, HOVER, apply_layout, HOVER
 from util.data import load_all, load_turma, PEDRA_ORDER, PEDRA_COLORS, IND_LABELS, IND_PESOS
 from util.layout import sidebar
 
-st.set_page_config(page_title="Análise Exploratória · Passos Mágicos", layout="wide", page_icon="📊", initial_sidebar_state="expanded")
+st.set_page_config(page_title="📊 Análise Exploratória", layout="wide", page_icon="📊", initial_sidebar_state="expanded")
 inject_css()
 sidebar()
 
@@ -39,8 +39,7 @@ with tab1:
                                     box_visible=True, meanline_visible=True,
                                     fillcolor=color, opacity=0.5, line_color=color,
                                     points=False))
-        layout = PLOTLY_LAYOUT.copy(); layout.update(height=360)
-        fig.update_layout(**layout)
+        fig.update_layout(**get_layout(height=360))
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
@@ -65,9 +64,7 @@ with tab1:
                           dash='solid' if peso==20 else 'dot'),
                 marker=dict(size=8 if peso==20 else 5, color=color),
             ))
-        layout2 = PLOTLY_LAYOUT.copy()
-        layout2.update(height=360, legend=dict(x=1.01, y=0.5, orientation='v'))
-        fig2.update_layout(**layout2)
+        apply_layout(fig2, height=360, legend=dict(x=1.01, y=0.5, orientation='v'))
         st.plotly_chart(fig2, use_container_width=True)
 
     st.markdown(insight(
@@ -91,10 +88,9 @@ with tab1:
         text=[f"{v:.2f}" for v in fase_inde['INDE']],
         textposition='outside', textfont=dict(color=COLORS['text']),
     ))
-    layout3 = PLOTLY_LAYOUT.copy()
-    layout3.update(height=320, yaxis_title="INDE médio", yaxis_range=[0,9],
+    apply_layout(fig3, height=320, yaxis_title="INDE médio", yaxis_range=[0,9],
                    xaxis_title="Fase do programa")
-    fig3.update_layout(**layout3)
+    fig3.update_layout(hoverlabel=dict(bgcolor="#1A1D27",bordercolor="#2E3350",font=dict(color="#F1F5F9",size=12)))
     st.plotly_chart(fig3, use_container_width=True)
 
 # ── TAB 2: PEDRAS ─────────────────────────────────────────────
@@ -115,8 +111,7 @@ with tab2:
                      color_discrete_map=PEDRA_COLORS, barmode='group', text='Count',
                      category_orders={'Pedra':PEDRA_ORDER})
         fig.update_traces(textposition='outside')
-        layout = PLOTLY_LAYOUT.copy(); layout.update(height=340)
-        fig.update_layout(**layout)
+        fig.update_layout(**get_layout(height=340))
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
@@ -132,9 +127,7 @@ with tab2:
             text=[f"{v:.1f}%" for v in pv_ped['Sim']],
             textposition='outside', textfont=dict(color=COLORS['text']),
         ))
-        layout2 = PLOTLY_LAYOUT.copy()
-        layout2.update(height=340, yaxis_title="% com Ponto de Virada", yaxis_range=[0,65])
-        fig2.update_layout(**layout2)
+        apply_layout(fig2, height=340, yaxis_title="% com Ponto de Virada", yaxis_range=[0,65])
         st.plotly_chart(fig2, use_container_width=True)
 
     st.markdown(insight(
@@ -164,8 +157,8 @@ with tab2:
         textposition='outside', textfont=dict(color=COLORS['text']),
         width=0.4,
     ))
-    layout3 = PLOTLY_LAYOUT.copy(); layout3.update(height=280)
-    fig3.update_layout(**layout3)
+    fig3.update_layout(**get_layout(height=280))
+    fig3.update_layout(hoverlabel=dict(bgcolor="#1A1D27",bordercolor="#2E3350",font=dict(color="#F1F5F9",size=12)))
     st.plotly_chart(fig3, use_container_width=True)
 
     df_tr2 = df_tr.copy()
@@ -200,9 +193,7 @@ with tab3:
                 text=f"{row['Taxa']*100:.1f}%", textposition='outside',
                 textfont=dict(color=COLORS['text']), width=0.35,
             ))
-        layout = PLOTLY_LAYOUT.copy()
-        layout.update(height=300, yaxis_range=[0,75], showlegend=False, yaxis_title="%")
-        fig.update_layout(**layout)
+        apply_layout(fig, height=300, yaxis_range=[0,75], showlegend=False, yaxis_title="%")
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
@@ -225,10 +216,8 @@ with tab3:
                 text=[f"{v:.3f}" for v in sub['INDE']], textposition='top center',
                 textfont=dict(color=SEXO_C[s], size=11),
             ))
-        layout2 = PLOTLY_LAYOUT.copy()
-        layout2.update(height=300, yaxis_range=[6.5,7.7],
+        apply_layout(fig2, height=300, yaxis_range=[6.5,7.7],
                        xaxis=dict(**PLOTLY_LAYOUT['xaxis'], type='category'))
-        fig2.update_layout(**layout2)
         st.plotly_chart(fig2, use_container_width=True)
 
     st.markdown(insight(
@@ -257,10 +246,9 @@ with tab3:
                   barmode='group', text='Pct',
                   category_orders={'Faixa':lbls})
     fig3.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    layout3 = PLOTLY_LAYOUT.copy()
-    layout3.update(height=320, yaxis_title='% das evasões do gênero', xaxis_title='Faixa etária (anos)',
+    apply_layout(fig3, height=320, yaxis_title='% das evasões do gênero', xaxis_title='Faixa etária (anos)',
                    xaxis=dict(**PLOTLY_LAYOUT['xaxis'], type='category'))
-    fig3.update_layout(**layout3)
+    fig3.update_layout(hoverlabel=dict(bgcolor="#1A1D27",bordercolor="#2E3350",font=dict(color="#F1F5F9",size=12)))
     st.plotly_chart(fig3, use_container_width=True)
 
     st.markdown(insight(
@@ -285,8 +273,7 @@ with tab4:
         fig = px.bar(dc, x='Defasagem', y='Count', color='Cat',
                      color_discrete_map=color_map, text='Count')
         fig.update_traces(textposition='outside')
-        layout = PLOTLY_LAYOUT.copy(); layout.update(height=320)
-        fig.update_layout(**layout)
+        fig.update_layout(**get_layout(height=320))
         st.plotly_chart(fig, use_container_width=True)
 
         total_def = df['DEFASAGEM_2021'].notna().sum()
@@ -306,8 +293,7 @@ with tab4:
             fig2.add_trace(go.Violin(y=df_n[col], name=f"{name} (μ={df_n[col].mean():.2f})",
                                      box_visible=True, meanline_visible=True,
                                      fillcolor=color, opacity=0.5, line_color=color, points=False))
-        layout2 = PLOTLY_LAYOUT.copy(); layout2.update(height=320)
-        fig2.update_layout(**layout2)
+        fig2.update_layout(**get_layout(height=320))
         st.plotly_chart(fig2, use_container_width=True)
 
         corrs = {
@@ -343,10 +329,9 @@ with tab5:
         showscale=True,
         colorbar=dict(tickfont=dict(color=COLORS['muted']), title=dict(text='r', font=dict(color=COLORS['muted']))),
     ))
-    layout = PLOTLY_LAYOUT.copy()
-    layout.update(height=500, xaxis=dict(**PLOTLY_LAYOUT['xaxis'], side='bottom'),
+    apply_layout(fig, height=500, xaxis=dict(**PLOTLY_LAYOUT['xaxis'], side='bottom'),
                   margin=dict(l=16,r=16,t=20,b=16))
-    fig.update_layout(**layout)
+    fig.update_layout(hoverlabel=dict(bgcolor="#1A1D27",bordercolor="#2E3350",font=dict(color="#F1F5F9",size=12)))
     st.plotly_chart(fig, use_container_width=True)
 
     st.markdown(insight(

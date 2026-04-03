@@ -1,11 +1,13 @@
+import copy
+
 COLORS = {
     "bg":         "#0F1117",
     "surface":    "#1A1D27",
     "surface2":   "#22263A",
     "border":     "#2E3350",
-    "accent":     "#6EE7B7",      # emerald
-    "accent2":    "#818CF8",      # indigo
-    "gold":       "#FCD34D",      # amber
+    "accent":     "#6EE7B7",
+    "accent2":    "#818CF8",
+    "gold":       "#FCD34D",
     "red":        "#F87171",
     "text":       "#F1F5F9",
     "muted":      "#94A3B8",
@@ -18,13 +20,13 @@ COLORS = {
     "masc":       "#60A5FA",
 }
 
-PLOTLY_LAYOUT = dict(
+_BASE_LAYOUT = dict(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     font=dict(family="Inter, sans-serif", color=COLORS["muted"], size=12),
-    title_font=dict(family="Inter, sans-serif", color=COLORS["text"], size=15),
+    title=dict(text="", font=dict(family="Inter, sans-serif", color=COLORS["text"], size=15)),
     legend=dict(
-        bgcolor="rgba(26,29,39,0.8)",
+        bgcolor="rgba(26,29,39,0.9)",
         bordercolor=COLORS["border"],
         borderwidth=1,
         font=dict(color=COLORS["muted"], size=11),
@@ -50,8 +52,30 @@ PLOTLY_LAYOUT = dict(
         font=dict(color="#F1F5F9", size=12),
         namelength=-1,
     ),
-    title=dict(text=""),
 )
+
+# Keep PLOTLY_LAYOUT for backward compat but use get_layout() for new code
+PLOTLY_LAYOUT = _BASE_LAYOUT
+
+HOVER = dict(
+    bgcolor="#1A1D27",
+    bordercolor="#2E3350",
+    font=dict(color="#F1F5F9", size=12),
+    namelength=-1,
+)
+
+def get_layout(**kwargs):
+    """Returns a fresh deep copy of the base layout with optional overrides."""
+    layout = copy.deepcopy(_BASE_LAYOUT)
+    layout.update(kwargs)
+    # Always enforce hover
+    layout['hoverlabel'] = copy.deepcopy(HOVER)
+    return layout
+
+def apply_layout(fig, **kwargs):
+    """Apply layout to fig and guarantee dark hover."""
+    fig.update_layout(**get_layout(**kwargs))
+    return fig
 
 CSS = """
 <style>
@@ -124,15 +148,6 @@ html, body, [class*="css"] {
     color: #F1F5F9;
     line-height: 1.2;
     margin-bottom: 1.5rem;
-}
-
-.pedra-badge {
-    display: inline-block;
-    padding: 0.2rem 0.75rem;
-    border-radius: 2rem;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
 }
 
 div[data-testid="stExpander"] {

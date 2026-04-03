@@ -8,11 +8,11 @@ from sklearn.preprocessing import LabelEncoder
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from util.style import inject_css, metric_card, insight, section_header, PLOTLY_LAYOUT, COLORS
+from util.style import inject_css, metric_card, insight, section_header, PLOTLY_LAYOUT, COLORS, get_layout, HOVER, apply_layout, HOVER
 from util.data import load_all, PEDRA_ORDER
 from util.layout import sidebar
 
-st.set_page_config(page_title="Modelos Preditivos · Passos Mágicos", layout="wide", page_icon="🤖", initial_sidebar_state="expanded")
+st.set_page_config(page_title="🤖 Modelos Preditivos", layout="wide", page_icon="🤖", initial_sidebar_state="expanded")
 inject_css()
 sidebar()
 
@@ -113,10 +113,8 @@ with tab1:
             marker_color=COLORS['red'], opacity=0.7,
             histnorm='probability density',
         ))
-        layout = PLOTLY_LAYOUT.copy()
-        layout.update(height=320, barmode='overlay', xaxis_title='Score de risco',
+        apply_layout(fig, height=320, barmode='overlay', xaxis_title='Score de risco',
                       yaxis_title='Densidade', legend=dict(x=0.7, y=0.95))
-        fig.update_layout(**layout)
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
@@ -137,10 +135,8 @@ with tab1:
             text=[f"{v:.3f}" for v in top_imp['Importance']],
             textposition='outside', textfont=dict(color=COLORS['muted'], size=10),
         ))
-        layout2 = PLOTLY_LAYOUT.copy()
-        layout2.update(height=320, xaxis_range=[0,0.22], margin=dict(l=16,r=60,t=10,b=16),
+        apply_layout(fig2, height=320, xaxis_range=[0,0.22], margin=dict(l=16,r=60,t=10,b=16),
                        yaxis=dict(**PLOTLY_LAYOUT['yaxis'], categoryorder='total ascending'))
-        fig2.update_layout(**layout2)
         st.plotly_chart(fig2, use_container_width=True)
 
     # Risk segments
@@ -209,10 +205,8 @@ with tab2:
             marker_color=COLORS['gold'], opacity=0.8,
             histnorm='probability density',
         ))
-        layout = PLOTLY_LAYOUT.copy()
-        layout.update(height=320, barmode='overlay', xaxis_title='Score de probabilidade PV',
+        apply_layout(fig, height=320, barmode='overlay', xaxis_title='Score de probabilidade PV',
                       yaxis_title='Densidade', legend=dict(x=0.2, y=0.95))
-        fig.update_layout(**layout)
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
@@ -234,10 +228,8 @@ with tab2:
             text=[f"{v:.3f}" for v in top_pv['Importance']],
             textposition='outside', textfont=dict(color=COLORS['muted'], size=10),
         ))
-        layout2 = PLOTLY_LAYOUT.copy()
-        layout2.update(height=320, xaxis_range=[0,0.55], margin=dict(l=16,r=60,t=10,b=16),
+        apply_layout(fig2, height=320, xaxis_range=[0,0.55], margin=dict(l=16,r=60,t=10,b=16),
                        yaxis=dict(**PLOTLY_LAYOUT['yaxis'], categoryorder='total ascending'))
-        fig2.update_layout(**layout2)
         st.plotly_chart(fig2, use_container_width=True)
 
     # PV by score bucket
@@ -257,10 +249,9 @@ with tab2:
         text=[f"{v}% (n={n})" for v,n in zip(pv_by_faixa['PV_pct'],pv_by_faixa['N'])],
         textposition='outside', textfont=dict(color=COLORS['text']),
     ))
-    layout3 = PLOTLY_LAYOUT.copy()
-    layout3.update(height=300, xaxis_title='Faixa de score', yaxis_title='% que atingiu PV de fato',
+    apply_layout(fig3, height=300, xaxis_title='Faixa de score', yaxis_title='% que atingiu PV de fato',
                    yaxis_range=[0,120])
-    fig3.update_layout(**layout3)
+    fig3.update_layout(hoverlabel=dict(bgcolor="#1A1D27",bordercolor="#2E3350",font=dict(color="#F1F5F9",size=12)))
     st.plotly_chart(fig3, use_container_width=True)
 
     st.markdown(insight(
@@ -308,12 +299,11 @@ with tab3:
     ))
     fig.add_vline(x=0.5, line_dash="dash", line_color=COLORS['dim'],
                   annotation_text="AUC=0.5 (aleatório)")
-    layout = PLOTLY_LAYOUT.copy()
-    layout.update(height=380, xaxis_range=[0,1.15], xaxis_title='Score (R² ou AUC-ROC)',
+    fig.update_layout(**get_layout(height=380, xaxis_range=[0,1.15], xaxis_title='Score (R² ou AUC-ROC)',
                   margin=dict(l=16,r=80,t=20,b=16),
                   yaxis=dict(**PLOTLY_LAYOUT['yaxis'], categoryorder='array',
-                             categoryarray=df_mod['Modelo'].tolist()[::-1]))
-    fig.update_layout(**layout)
+                             categoryarray=df_mod['Modelo'].tolist()[::-1])))
+    fig.update_layout(hoverlabel=dict(bgcolor="#1A1D27",bordercolor="#2E3350",font=dict(color="#F1F5F9",size=12)))
     st.plotly_chart(fig, use_container_width=True)
 
     st.markdown(insight(

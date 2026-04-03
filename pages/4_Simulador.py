@@ -12,7 +12,7 @@ from util.data import load_all, PEDRA_ORDER
 from util.layout import sidebar
 
 st.set_page_config(
-    page_title="Simulador · Passos Mágicos",
+    page_title="🎯 Simulador",
     layout="wide",
     page_icon="🎯",
     initial_sidebar_state="expanded"
@@ -99,8 +99,6 @@ with col_acad:
     <div style="color:#6EE7B7;font-size:0.68rem;font-weight:600;letter-spacing:0.15em;
                 text-transform:uppercase;margin-bottom:0.75rem;">INDICADORES ACADÊMICOS</div>
     """, unsafe_allow_html=True)
-    inde = st.slider("INDE (Índice Geral)", 0.0, 10.0, 7.0, 0.1,
-                     help="Índice de Desenvolvimento Educacional")
     ida = st.slider("IDA — Desempenho Acadêmico", 0.0, 10.0, 6.5, 0.1,
                     help="Notas nas provas e avaliações")
     ieg = st.slider("IEG — Engajamento", 0.0, 10.0, 7.0, 0.1,
@@ -125,12 +123,48 @@ with col_psico:
     ipv = st.slider("IPV — Ponto de Virada", 0.0, 10.0, 7.5, 0.1,
                     help="Integração aos princípios Passos Mágicos — o maior preditor do PV")
 
+# ── INDE CALCULADO AUTOMATICAMENTE ──────────────────────────
 st.divider()
+inde = round(ian*0.10 + ida*0.20 + ieg*0.20 + iaa*0.10 + ips*0.10 + ipp*0.10 + ipv*0.20, 4)
+st.markdown(f"""
+<div style="background:#1A1D27;border:1px solid #2E3350;border-radius:10px;
+            padding:1rem 1.4rem;margin-bottom:0.5rem;">
+<div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+    <div>
+        <div style="font-size:0.65rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;
+                    color:#6EE7B7;margin-bottom:0.2rem;">INDE CALCULADO</div>
+        <div style="font-size:2.5rem;font-weight:800;color:#6EE7B7;line-height:1;">{inde:.3f}</div>
+    </div>
+    <div style="color:#475569;font-size:0.78rem;line-height:1.8;">
+        <code style="color:#94A3B8;background:#0D0F1A;padding:0.3rem 0.6rem;border-radius:4px;font-size:0.75rem;">
+        INDE = IAN×10% + IDA×20% + IEG×20% + IAA×10% + IPS×10% + IPP×10% + IPV×20%
+        </code><br/>
+        <span style="color:#64748B;font-size:0.72rem;">
+        = {ian:.1f}×0,10 + {ida:.1f}×0,20 + {ieg:.1f}×0,20 + {iaa:.1f}×0,10 + {ips:.1f}×0,10 + {ipp:.1f}×0,10 + {ipv:.1f}×0,20
+        </span>
+    </div>
+</div>
+</div>
+""", unsafe_allow_html=True)
 
 # ── CALCULATE ─────────────────────────────────────────────────
 pedra_enc = le_pedra.transform([pedra])[0]
 sexo_enc  = 1.0 if sexo == "Masculino" else 0.0
 bolsista_enc = 1.0 if bolsista == "Sim" else 0.0
+
+# Compute INDE from official formula
+inde = round(ian*0.10 + ida*0.20 + ieg*0.20 + iaa*0.10 + ips*0.10 + ipp*0.10 + ipv*0.20, 3)
+
+st.divider()
+st.markdown(f"""
+<div style="background:rgba(110,231,183,0.08);border:1px solid rgba(110,231,183,0.25);
+            border-radius:10px;padding:0.9rem 1.4rem;margin-bottom:0.5rem;text-align:center;">
+    <span style="color:#6EE7B7;font-size:0.68rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;">
+        INDE CALCULADO (IAN×10% + IDA×20% + IEG×20% + IAA×10% + IPS×10% + IPP×10% + IPV×20%)
+    </span>
+    <div style="font-size:2.5rem;font-weight:800;color:#6EE7B7;line-height:1.2;">{inde:.3f}</div>
+</div>
+""", unsafe_allow_html=True)
 
 X_ev = pd.DataFrame([[inde, iaa, ieg, ips, ida, ipp, ipv, ian,
                        float(fase), float(defasagem), pedra_enc, sexo_enc]],
@@ -250,6 +284,7 @@ def make_gauge(value, title, color, threshold_low=0.3, threshold_high=0.6):
         font=dict(color=COLORS['muted']),
         height=250,
         margin=dict(l=20, r=20, t=40, b=20),
+        hoverlabel=dict(bgcolor="#1A1D27", bordercolor="#2E3350", font=dict(color="#F1F5F9", size=12)),
     )
     return fig
 
@@ -340,9 +375,8 @@ with col_f1:
         text=[f"{v*100:.1f}%" for v in top_ev.values],
         textposition='outside', textfont=dict(color=COLORS['muted'], size=10),
     ))
-    layout = PLOTLY_LAYOUT.copy()
-    layout.update(height=260, xaxis_range=[0,0.22], margin=dict(l=16,r=60,t=10,b=16))
-    fig.update_layout(**layout)
+    apply_layout(fig, height=260, xaxis_range=[0,0.22], margin=dict(l=16,r=60,t=10,b=16))
+    fig.update_layout(hoverlabel=dict(bgcolor="#1A1D27",bordercolor="#2E3350",font=dict(color="#F1F5F9",size=12)))
     st.plotly_chart(fig, use_container_width=True)
 
 imp_pv_series = pd.Series(rf_pv.feature_importances_, index=feats_pv)
@@ -364,9 +398,8 @@ with col_f2:
         text=[f"{v*100:.1f}%" for v in top_pv.values],
         textposition='outside', textfont=dict(color=COLORS['muted'], size=10),
     ))
-    layout2 = PLOTLY_LAYOUT.copy()
-    layout2.update(height=260, xaxis_range=[0,0.55], margin=dict(l=16,r=60,t=10,b=16))
-    fig2.update_layout(**layout2)
+    apply_layout(fig2, height=260, xaxis_range=[0,0.55], margin=dict(l=16,r=60,t=10,b=16))
+    fig2.update_layout(hoverlabel=dict(bgcolor="#1A1D27",bordercolor="#2E3350",font=dict(color="#F1F5F9",size=12)))
     st.plotly_chart(fig2, use_container_width=True)
 
 st.markdown("""
