@@ -26,8 +26,7 @@ st.markdown("""
         Luminar de Dados<br/><span style="color:#6EE7B7;">Iluminando Vidas</span>
     </h1>
     <p style="color:#64748B;font-size:0.95rem;max-width:680px;margin:0;">
-        Análise do impacto educacional e social da ONG Passos Mágicos sobre crianças e jovens
-        em situação de vulnerabilidade — baseada nos dados PEDE 2020, 2021 e 2022.
+        Análise do impacto educacional e social da ONG Passos Mágicos sobre crianças e jovens em situação de vulnerabilidade — baseada nos dados PEDE 2020, 2021 e 2022.
     </p>
 </div>
 """, unsafe_allow_html=True)
