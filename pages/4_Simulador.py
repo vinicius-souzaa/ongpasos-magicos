@@ -7,7 +7,7 @@ from sklearn.preprocessing import LabelEncoder
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from util.style import inject_css, insight, section_header, PLOTLY_LAYOUT, COLORS
+from util.style import inject_css, insight, section_header, PLOTLY_LAYOUT, COLORS, get_layout
 from util.data import load_all, PEDRA_ORDER
 from util.layout import sidebar
 
@@ -80,8 +80,19 @@ with col_info:
     <div style="color:#6EE7B7;font-size:0.68rem;font-weight:600;letter-spacing:0.15em;
                 text-transform:uppercase;margin-bottom:0.75rem;">DADOS GERAIS</div>
     """, unsafe_allow_html=True)
-    fase = st.selectbox("Fase do programa", options=[0,1,2,3,4,5,6,7],
-                        format_func=lambda x: f"Fase {x}", index=2)
+    FASES = {
+        0: "Fase 0 — Alfabetização",
+        1: "Fase 1 — 1º e 2º ano (Fund.)",
+        2: "Fase 2 — 3º e 4º ano (Fund.)",
+        3: "Fase 3 — 5º e 6º ano (Fund.)",
+        4: "Fase 4 — 7º e 8º ano (Fund.)",
+        5: "Fase 5 — 9º ano (Fund.)",
+        6: "Fase 6 — 1º e 2º ano (Médio)",
+        7: "Fase 7 — 3º ano (Médio)",
+    }
+    fase_label = st.selectbox("Fase do programa", options=list(FASES.keys()),
+                               format_func=lambda x: FASES[x], index=2)
+    fase = fase_label
     pedra = st.selectbox("Classificação (Pedra)", options=PEDRA_ORDER, index=2)
     sexo = st.radio("Sexo", options=["Feminino","Masculino"], horizontal=True)
     defasagem = st.slider("Defasagem escolar", min_value=-4, max_value=2, value=-1,
@@ -146,19 +157,7 @@ pedra_enc = le_pedra.transform([pedra])[0]
 sexo_enc  = 1.0 if sexo == "Masculino" else 0.0
 bolsista_enc = 1.0 if bolsista == "Sim" else 0.0
 
-# Compute INDE from official formula
-inde = round(ian*0.10 + ida*0.20 + ieg*0.20 + iaa*0.10 + ips*0.10 + ipp*0.10 + ipv*0.20, 3)
-
-st.divider()
-st.markdown(f"""
-<div style="background:rgba(110,231,183,0.08);border:1px solid rgba(110,231,183,0.25);
-            border-radius:10px;padding:0.9rem 1.4rem;margin-bottom:0.5rem;text-align:center;">
-    <span style="color:#6EE7B7;font-size:0.68rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;">
-        INDE CALCULADO (IAN×10% + IDA×20% + IEG×20% + IAA×10% + IPS×10% + IPP×10% + IPV×20%)
-    </span>
-    <div style="font-size:2.5rem;font-weight:800;color:#6EE7B7;line-height:1.2;">{inde:.3f}</div>
-</div>
-""", unsafe_allow_html=True)
+# INDE already computed above
 
 X_ev = pd.DataFrame([[inde, iaa, ieg, ips, ida, ipp, ipv, ian,
                        float(fase), float(defasagem), pedra_enc, sexo_enc]],
@@ -369,7 +368,7 @@ with col_f1:
         text=[f"{v*100:.1f}%" for v in top_ev.values],
         textposition='outside', textfont=dict(color=COLORS['muted'], size=10),
     ))
-    apply_layout(fig, height=260, xaxis_range=[0,0.22], margin=dict(l=16,r=60,t=10,b=16))
+    fig.update_layout(**get_layout(height=260, xaxis_range=[0,0.22], margin=dict(l=16,r=60,t=10,b=16)))
     fig.update_layout(hoverlabel=dict(bgcolor="#1A1D27",bordercolor="#2E3350",font=dict(color="#F1F5F9",size=12)))
     st.plotly_chart(fig, use_container_width=True)
 
@@ -392,7 +391,7 @@ with col_f2:
         text=[f"{v*100:.1f}%" for v in top_pv.values],
         textposition='outside', textfont=dict(color=COLORS['muted'], size=10),
     ))
-    apply_layout(fig2, height=260, xaxis_range=[0,0.55], margin=dict(l=16,r=60,t=10,b=16))
+    fig2.update_layout(**get_layout(height=260, xaxis_range=[0,0.55], margin=dict(l=16,r=60,t=10,b=16)))
     fig2.update_layout(hoverlabel=dict(bgcolor="#1A1D27",bordercolor="#2E3350",font=dict(color="#F1F5F9",size=12)))
     st.plotly_chart(fig2, use_container_width=True)
 
