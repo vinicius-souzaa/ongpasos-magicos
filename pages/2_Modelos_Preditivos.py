@@ -77,10 +77,29 @@ with st.spinner("Treinando modelos..."):
 
 # ── TAB 1: EVASION RISK ───────────────────────────────────────
 with tab1:
+    st.markdown("""
+    <div style="background:rgba(110,231,183,0.06);border:1px solid rgba(110,231,183,0.15);
+                border-radius:10px;padding:1.1rem 1.4rem;margin-bottom:1.25rem;">
+    <p style="color:#6EE7B7;font-size:0.68rem;font-weight:600;letter-spacing:0.15em;
+              text-transform:uppercase;margin-bottom:0.5rem;">O QUE É O MODELO DE RISCO DE EVASÃO?</p>
+    <p style="color:#94A3B8;font-size:0.83rem;line-height:1.7;margin:0;">
+    O modelo analisa os <strong style="color:#F1F5F9;">indicadores do aluno no ano anterior</strong>
+    (INDE, IDA, IEG, IPV, fase, defasagem etc.) e calcula a probabilidade de esse aluno
+    <strong style="color:#F87171;">não aparecer nos dados do ano seguinte</strong>.<br/><br/>
+    Tecnicamente, é um <strong style="color:#F1F5F9;">Random Forest</strong> — um conjunto de 200 árvores de decisão
+    que votam em conjunto. Cada árvore aprendeu padrões diferentes nos dados históricos de
+    <strong style="color:#F1F5F9;">684 alunos</strong> (33,2% evadiu após 2021).
+    O resultado final é um <strong style="color:#FCD34D;">score entre 0 e 1</strong>:
+    quanto mais próximo de 1, maior o risco de o aluno não estar presente no próximo ciclo.
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
+
     c1, c2 = st.columns([2,1])
 
     with c1:
         st.markdown("#### Distribuição de risco de evasão")
+        st.caption("O gráfico mostra quantos alunos de cada grupo (evadiu / permaneceu) caíram em cada faixa de score. Um modelo bom separa bem os dois grupos — os verdes devem concentrar à esquerda (baixo risco) e os vermelhos à direita (alto risco).")
         fig = go.Figure()
         fig.add_trace(go.Histogram(
             x=df_ev[df_ev['evadiu']==0]['prob_evasao'],
@@ -101,7 +120,8 @@ with tab1:
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
-        st.markdown("#### Importância das features")
+        st.markdown("#### Por que o aluno é considerado em risco?")
+        st.caption("Mostra quais indicadores o modelo considera mais relevantes para prever evasão. INDE geral lidera (15,9%), seguido de IPV (13,9%) e IDA (13,7%). Quanto maior a barra, mais esse indicador influencia a previsão.")
         top_imp = imp_ev.head(6).reset_index()
         top_imp.columns = ['Feature','Importance']
         labels_map = {
@@ -125,6 +145,7 @@ with tab1:
 
     # Risk segments
     st.markdown("#### Segmentação de risco")
+    st.caption("Os alunos são divididos em 3 grupos pelo score: Baixo (0–30%), Médio (30–60%) e Alto (60–100%). O percentual abaixo de cada card mostra quantos desse grupo realmente evadiu — validando se o modelo está separando bem os casos.")
     df_ev['risco'] = pd.cut(df_ev['prob_evasao'], bins=[0,0.3,0.6,1.0],
                               labels=['🟢 Baixo','🟡 Médio','🔴 Alto'])
     risco_counts = df_ev['risco'].value_counts().reset_index()
@@ -151,10 +172,30 @@ with tab1:
 
 # ── TAB 2: PONTO DE VIRADA ────────────────────────────────────
 with tab2:
+    st.markdown("""
+    <div style="background:rgba(252,211,77,0.06);border:1px solid rgba(252,211,77,0.15);
+                border-radius:10px;padding:1.1rem 1.4rem;margin-bottom:1.25rem;">
+    <p style="color:#FCD34D;font-size:0.68rem;font-weight:600;letter-spacing:0.15em;
+              text-transform:uppercase;margin-bottom:0.5rem;">O QUE É O MODELO DE PONTO DE VIRADA?</p>
+    <p style="color:#94A3B8;font-size:0.83rem;line-height:1.7;margin:0;">
+    O <strong style="color:#F1F5F9;">Ponto de Virada</strong> é o momento em que o aluno demonstra
+    uma transformação significativa — não apenas acadêmica, mas também em sua integração aos
+    valores e princípios da Passos Mágicos (medido pelo IPV).<br/><br/>
+    O modelo analisa os <strong style="color:#F1F5F9;">indicadores do aluno no ciclo atual</strong>
+    e calcula a probabilidade de ele atingir o Ponto de Virada.
+    Também é um <strong style="color:#F1F5F9;">Random Forest</strong>, treinado em
+    <strong style="color:#F1F5F9;">285 alunos</strong> com dados completos de 2022 (17,2% atingiu PV).
+    O <strong style="color:#FCD34D;">score entre 0 e 1</strong> indica: quanto mais próximo de 1,
+    maior a chance de o aluno atingir esse marco.
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
+
     c1, c2 = st.columns([2,1])
 
     with c1:
         st.markdown("#### Score de probabilidade de Ponto de Virada")
+        st.caption("Alunos que realmente atingiram o PV (amarelo) devem concentrar à direita — scores altos. Alunos que não atingiram (cinza) devem concentrar à esquerda. Quanto melhor a separação, mais confiável o modelo.")
         fig = go.Figure()
         fig.add_trace(go.Histogram(
             x=df_pv_model[df_pv_model['pv_bin']==0]['prob_pv'],
@@ -175,7 +216,8 @@ with tab2:
         st.plotly_chart(fig, use_container_width=True)
 
     with c2:
-        st.markdown("#### Features mais importantes para PV")
+        st.markdown("#### O que mais influencia o Ponto de Virada?")
+        st.caption("IPV (Indicador do Ponto de Virada) domina com 43% de importância — faz sentido: o IPV mede diretamente a integração do aluno aos princípios da ONG, que é o que define o Ponto de Virada.")
         top_pv = imp_pv.head(6).reset_index()
         top_pv.columns = ['Feature','Importance']
         labels_pv = {
@@ -199,7 +241,8 @@ with tab2:
         st.plotly_chart(fig2, use_container_width=True)
 
     # PV by score bucket
-    st.markdown("#### Probabilidade de PV por faixa de score")
+    st.markdown("#### Calibração: o modelo acerta?")
+    st.caption("Cada barra mostra: dos alunos com aquele range de score, qual % realmente atingiu o PV. Um modelo bem calibrado mostra uma escada crescente — score alto = alta taxa real de PV.")
     df_pv_model['score_faixa'] = pd.cut(df_pv_model['prob_pv'],
                                           bins=[0,0.1,0.3,0.5,0.7,0.9,1.0],
                                           labels=['0-10%','10-30%','30-50%','50-70%','70-90%','90-100%'])
@@ -284,14 +327,16 @@ with tab3:
     st.markdown("""
     <div style="background:#1A1D27;border:1px solid #2E3350;border-radius:10px;padding:1.25rem;margin-top:1rem;">
     <p style="color:#6EE7B7;font-size:0.7rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.5rem;">
-        RECOMENDAÇÃO PARA A ONG
+        COMO A ONG USARIA ESSES MODELOS NA PRÁTICA
     </p>
     <p style="color:#94A3B8;font-size:0.85rem;margin:0;line-height:1.65;">
-        No início de cada semestre, rodar o <strong style="color:#F1F5F9;">modelo de risco de evasão</strong>
-        com os dados do período anterior e entregar à equipe de coordenação uma lista priorizada dos
-        alunos com maior score. Os 10% de maior risco merecem contato proativo antes do próximo ciclo avaliativo.
-        Para bolsas: usar o <strong style="color:#FCD34D;">modelo de PV</strong> para identificar alunos
-        com alta probabilidade de Ponto de Virada que ainda não são bolsistas — candidatos ideais para indicação.
+        No fechamento de cada ciclo avaliativo, um analista exporta os dados dos alunos em CSV,
+        executa os scripts deste projeto e gera duas planilhas:
+        <strong style="color:#F1F5F9;">(1) Lista de risco de evasão</strong> — alunos ordenados pelo score,
+        para a equipe de coordenação entrar em contato proativamente com os de maior risco antes do próximo ciclo.
+        <strong style="color:#FCD34D;">(2) Candidatos a bolsa</strong> — alunos com alta probabilidade de Ponto de Virada
+        que ainda não são bolsistas, priorizando indicações para o programa de bolsas.
+        Todo o código está disponível no repositório GitHub para replicação.
     </p>
     </div>
     """, unsafe_allow_html=True)

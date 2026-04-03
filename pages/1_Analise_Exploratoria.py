@@ -77,25 +77,23 @@ with tab1:
         "warning"
     ), unsafe_allow_html=True)
 
-    # Boxplot outliers
-    st.markdown("#### Outliers por indicador e ano")
-    inds_box = ['INDE','IAA','IEG','IPS','IDA','IPP','IPV','IAN']
-    fig3 = make_subplots(rows=1, cols=1)
+    # INDE by fase - more insightful
+    st.markdown("#### INDE médio por fase (2022)")
+    df_f = df[df['INDE_2022'].notna() & df['FASE_2022'].notna()].copy()
+    df_f['FASE_2022'] = df_f['FASE_2022'].astype(int)
+    fase_inde = df_f.groupby('FASE_2022').agg(INDE=('INDE_2022','mean'), n=('INDE_2022','count')).reset_index()
+    fase_inde['label'] = fase_inde.apply(lambda r: f"Fase {int(r['FASE_2022'])}<br>(n={int(r['n'])})", axis=1)
 
-    dfs_box = []
-    for ano in ['2020','2021','2022']:
-        cols = [f'{ind}_{ano}' for ind in inds_box if f'{ind}_{ano}' in df.columns]
-        df_melt = df[cols].copy()
-        df_melt.columns = [c.replace(f'_{ano}','') for c in df_melt.columns]
-        df_melt['Ano'] = ano
-        dfs_box.append(df_melt)
-    df_box = pd.concat(dfs_box)
-    df_melted = df_box.melt(id_vars='Ano', value_vars=inds_box, var_name='Indicador', value_name='Valor').dropna()
-
-    fig3 = px.box(df_melted, x='Indicador', y='Valor', color='Ano',
-                  color_discrete_map={'2020':COLORS['accent2'],'2021':COLORS['red'],'2022':COLORS['accent']},
-                  points=False)
-    layout3 = PLOTLY_LAYOUT.copy(); layout3.update(height=360)
+    fig3 = go.Figure(go.Bar(
+        x=fase_inde['label'], y=fase_inde['INDE'],
+        marker_color=[COLORS['accent'] if v >= 7.0 else COLORS['accent2'] if v >= 6.5 else COLORS['red']
+                      for v in fase_inde['INDE']],
+        text=[f"{v:.2f}" for v in fase_inde['INDE']],
+        textposition='outside', textfont=dict(color=COLORS['text']),
+    ))
+    layout3 = PLOTLY_LAYOUT.copy()
+    layout3.update(height=320, yaxis_title="INDE médio", yaxis_range=[0,9],
+                   xaxis_title="Fase do programa")
     fig3.update_layout(**layout3)
     st.plotly_chart(fig3, use_container_width=True)
 
@@ -170,6 +168,16 @@ with tab2:
     fig3.update_layout(**layout3)
     st.plotly_chart(fig3, use_container_width=True)
 
+    df_tr2 = df_tr.copy()
+    prom = (df_tr2['mov']=='Promovido').sum()
+    total_tr = len(df_tr2)
+    st.markdown(insight(
+        f"<strong>{prom} alunos ({prom/total_tr*100:.1f}%) foram promovidos de pedra</strong> de 2021 para 2022. "
+        "A maioria permanece na mesma pedra — o que é esperado, pois a progressão é criteriosa. "
+        "Alunos rebaixados merecem atenção especial da equipe pedagógica.",
+        "info"
+    ), unsafe_allow_html=True)
+
 # ── TAB 3: GÊNERO ─────────────────────────────────────────────
 with tab3:
     SEXO_C = {'F':COLORS['fem'],'M':COLORS['masc']}
@@ -217,7 +225,9 @@ with tab3:
                 text=[f"{v:.3f}" for v in sub['INDE']], textposition='top center',
                 textfont=dict(color=SEXO_C[s], size=11),
             ))
-        layout2 = PLOTLY_LAYOUT.copy(); layout2.update(height=300, yaxis_range=[6.5,7.7])
+        layout2 = PLOTLY_LAYOUT.copy()
+        layout2.update(height=300, yaxis_range=[6.5,7.7],
+                       xaxis=dict(**PLOTLY_LAYOUT['xaxis'], type='category'))
         fig2.update_layout(**layout2)
         st.plotly_chart(fig2, use_container_width=True)
 
@@ -234,6 +244,8 @@ with tab3:
     inat = df_turma[df_turma['IdMotivoInativacao'].notna() & df_turma['Sexo'].notna() & df_turma['IdadeInativacao'].notna()].copy()
     bins = [0,9,11,13,15,17,19,30]
     lbls = ['<10','10-11','12-13','14-15','16-17','18-19','20+']
+    inat['IdadeInativacao'] = pd.to_numeric(inat['IdadeInativacao'], errors='coerce')
+    inat = inat.dropna(subset=['IdadeInativacao'])
     inat['Faixa'] = pd.cut(inat['IdadeInativacao'], bins=bins, labels=lbls)
     fx = inat.groupby(['Faixa','Sexo']).size().reset_index(name='Count')
     ts = fx.groupby('Sexo')['Count'].transform('sum')
@@ -245,13 +257,15 @@ with tab3:
                   barmode='group', text='Pct',
                   category_orders={'Faixa':lbls})
     fig3.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-    layout3 = PLOTLY_LAYOUT.copy(); layout3.update(height=320, yaxis_title='% das evasões do gênero')
+    layout3 = PLOTLY_LAYOUT.copy()
+    layout3.update(height=320, yaxis_title='% das evasões do gênero', xaxis_title='Faixa etária (anos)',
+                   xaxis=dict(**PLOTLY_LAYOUT['xaxis'], type='category'))
     fig3.update_layout(**layout3)
     st.plotly_chart(fig3, use_container_width=True)
 
     st.markdown(insight(
         "<strong>Feminino evade muito mais entre 18-19 anos (13,1% vs 5,1% masculino)</strong> — "
-        "possível saída por gravidez, casamento ou mercado de trabalho em jovens adultas. "
+        "possível saída por outros fatores sociais em jovens adultas. "
         "Pico de evasão em 14-15 anos para ambos os gêneros.",
         "warning"
     ), unsafe_allow_html=True)
