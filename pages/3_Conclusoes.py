@@ -216,7 +216,7 @@ Streamlit Community Cloud
 <p style="color:#475569;font-size:0.75rem;margin:0;">
 <strong style="color:#94A3B8;">Vinicius Abreu Ernestino Souza</strong> ·
 PósTech Data Analytics · FIAP · Grupo 22 · Turma 3DTAT ·
-Fernando Abud Rojas Marin
+
 </p>
 </div>
 </div>
